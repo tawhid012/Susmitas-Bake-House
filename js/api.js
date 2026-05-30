@@ -98,17 +98,16 @@ const API = {
                 p.category = categories.find(c => c.id === p.category_id) || null;
             });
             
-            const excludedSlugs = ['personalised-gifts', 'keychains', 'bouquets'];
-            
             return {
-                featured: products.filter(p => p.bestseller && (!p.category || !excludedSlugs.includes(p.category.slug))).slice(0, 5),
-                gifts: products.filter(p => p.category && p.category.slug === 'personalised-gifts'),
-                keychains: products.filter(p => p.category && p.category.slug === 'keychains'),
-                bouquets: products.filter(p => p.category && p.category.slug === 'bouquets')
+                featured: products.filter(p => p.bestseller).slice(0, 5),
+                birthdays: products.filter(p => p.category && p.category.slug === 'birthday-cakes'),
+                anniversaries: products.filter(p => p.category && p.category.slug === 'anniversary-cakes'),
+                bento: products.filter(p => p.category && p.category.slug === 'bento-cakes'),
+                wedding: products.filter(p => p.category && p.category.slug === 'wedding-cakes')
             };
         } catch (err) {
             console.error('Error fetching homepage products:', err);
-            return { featured: [], gifts: [], keychains: [], bouquets: [] };
+            return { featured: [], birthdays: [], anniversaries: [], bento: [], wedding: [] };
         }
     },
 

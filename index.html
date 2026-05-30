@@ -147,36 +147,36 @@
                 </div>
             </div>
 
-            <!-- Personalised Gifts -->
+            <!-- Birthday Specials -->
             <div style="margin-top: 2.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; font-family: var(--font-heading);">Personalised Gifts</h3>
-                    <a href="products.html?category=personalised-gifts" style="color: #7c3aed; font-weight: 700; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 4px;">See All <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; font-family: var(--font-heading);">Birthday Specials</h3>
+                    <a href="products.html?category=birthday-cakes" style="color: #7c3aed; font-weight: 700; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 4px;">See All <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
                 </div>
-                <div class="horizontal-scroll" id="gifts-container">
-                    <p>Loading gifts...</p>
+                <div class="horizontal-scroll" id="birthdays-container">
+                    <p>Loading birthday cakes...</p>
                 </div>
             </div>
 
-            <!-- Keychains -->
+            <!-- Anniversary Specials -->
             <div style="margin-top: 2.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; font-family: var(--font-heading);">Keychains</h3>
-                    <a href="products.html?category=keychains" style="color: #7c3aed; font-weight: 700; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 4px;">See All <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; font-family: var(--font-heading);">Anniversary Specials</h3>
+                    <a href="products.html?category=anniversary-cakes" style="color: #7c3aed; font-weight: 700; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 4px;">See All <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
                 </div>
-                <div class="horizontal-scroll" id="keychains-container">
-                    <p>Loading keychains...</p>
+                <div class="horizontal-scroll" id="anniversaries-container">
+                    <p>Loading anniversary cakes...</p>
                 </div>
             </div>
 
-            <!-- Bouquets -->
+            <!-- Bento Cakes -->
             <div style="margin-top: 2.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; font-family: var(--font-heading);">Bouquets</h3>
-                    <a href="products.html?category=bouquets" style="color: #7c3aed; font-weight: 700; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 4px;">See All <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b; font-family: var(--font-heading);">Bento Cakes</h3>
+                    <a href="products.html?category=bento-cakes" style="color: #7c3aed; font-weight: 700; font-size: 0.85rem; text-decoration: none; display: flex; align-items: center; gap: 4px;">See All <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
                 </div>
-                <div class="horizontal-scroll" id="bouquets-container">
-                    <p>Loading bouquets...</p>
+                <div class="horizontal-scroll" id="bento-container">
+                    <p>Loading bento cakes...</p>
                 </div>
             </div>
 
@@ -350,9 +350,9 @@
 
             // Render all sliders
             renderSlider('trending-cakes-container', homepageData.featured, 'Check out our menu for delicious options!');
-            renderSlider('gifts-container', homepageData.gifts, 'Exciting gifts coming soon!');
-            renderSlider('keychains-container', homepageData.keychains, 'Unique keychains coming soon!');
-            renderSlider('bouquets-container', homepageData.bouquets, 'Beautiful bouquets coming soon!');
+            renderSlider('birthdays-container', homepageData.birthdays, 'Exciting birthday cakes coming soon!');
+            renderSlider('anniversaries-container', homepageData.anniversaries, 'Beautiful anniversary cakes coming soon!');
+            renderSlider('bento-container', homepageData.bento, 'Cute bento cakes coming soon!');
             } catch(e) {
                 document.getElementById('trending-cakes-container').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`;
                 console.error(e);
