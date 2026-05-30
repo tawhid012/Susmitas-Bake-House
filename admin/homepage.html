@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Homepage CMS | Susmita's Bake House Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">Bake House Admin
+                <button class="mobile-close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-link"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="orders.html" class="sidebar-link"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="products.html" class="sidebar-link"><i class="fas fa-cake-candles"></i> Products</a>
+                <a href="homepage.html" class="sidebar-link active"><i class="fas fa-globe"></i> Homepage CMS</a>
+                <a href="#" class="sidebar-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="admin-header-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <h2>Homepage Sections</h2>
+                </div>
+            </header>
+
+            <div class="admin-content" style="max-width: 800px;">
+                
+                <!-- Hero Section Editor -->
+                <div class="stat-card" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Hero Section</h3>
+                    <div class="form-group">
+                        <label>Headline</label>
+                        <input type="text" id="hero-headline" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Subheadline</label>
+                        <input type="text" id="hero-subheadline" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Hero Image (Filename/URL)</label>
+                        <input type="text" id="hero-image" class="form-control">
+                    </div>
+                    <button class="btn-admin" onclick="saveSection('hero')">Save Hero</button>
+                </div>
+
+                <!-- Offers Banner Editor -->
+                <div class="stat-card" style="margin-bottom: 20px; border-left-color: #F59E0B;">
+                    <h3 style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Promotional Banner</h3>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="promo-active"> Show Banner on Homepage</label>
+                    </div>
+                    <div class="form-group">
+                        <label>Banner Text</label>
+                        <input type="text" id="promo-text" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Banner Link</label>
+                        <input type="text" id="promo-link" class="form-control" placeholder="e.g. products.html">
+                    </div>
+                    <button class="btn-admin" style="background:#F59E0B;" onclick="saveSection('offers_banner')">Save Banner</button>
+                </div>
+
+                <!-- Trust Indicators Editor -->
+                <div class="stat-card" style="border-left-color: #10B981;">
+                    <h3 style="margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Trust Indicators (Counters)</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                        <div class="form-group">
+                            <label>Orders Completed</label>
+                            <input type="text" id="trust-orders" class="form-control" placeholder="e.g. 500+">
+                        </div>
+                        <div class="form-group">
+                            <label>Happy Customers</label>
+                            <input type="text" id="trust-customers" class="form-control" placeholder="e.g. 300+">
+                        </div>
+                        <div class="form-group">
+                            <label>Years Experience</label>
+                            <input type="text" id="trust-years" class="form-control" placeholder="e.g. 2">
+                        </div>
+                    </div>
+                    <button class="btn-admin" style="background:#10B981;" onclick="saveSection('trust_indicators')">Save Indicators</button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        async function loadHomepageCMS() {
+            const { data, error } = await supabaseClient.from('homepage_sections').select('*');
+            if(data) {
+                data.forEach(section => {
+                    const content = section.content;
+                    if(section.section_key === 'hero') {
+                        document.getElementById('hero-headline').value = content.headline || '';
+                        document.getElementById('hero-subheadline').value = content.subheadline || '';
+                        document.getElementById('hero-image').value = content.image_url || '';
+                    }
+                    if(section.section_key === 'offers_banner') {
+                        document.getElementById('promo-active').checked = section.active;
+                        document.getElementById('promo-text').value = content.text || '';
+                        document.getElementById('promo-link').value = content.link || '';
+                    }
+                    if(section.section_key === 'trust_indicators') {
+                        document.getElementById('trust-orders').value = content.orders_completed || '';
+                        document.getElementById('trust-customers').value = content.happy_customers || '';
+                        document.getElementById('trust-years').value = content.years_experience || '';
+                    }
+                });
+            }
+        }
+
+        async function saveSection(key) {
+            let content = {};
+            let active = true;
+
+            if(key === 'hero') {
+                content = {
+                    headline: document.getElementById('hero-headline').value,
+                    subheadline: document.getElementById('hero-subheadline').value,
+                    image_url: document.getElementById('hero-image').value
+                };
+            }
+            else if(key === 'offers_banner') {
+                active = document.getElementById('promo-active').checked;
+                content = {
+                    text: document.getElementById('promo-text').value,
+                    link: document.getElementById('promo-link').value
+                };
+            }
+            else if(key === 'trust_indicators') {
+                content = {
+                    orders_completed: document.getElementById('trust-orders').value,
+                    happy_customers: document.getElementById('trust-customers').value,
+                    years_experience: document.getElementById('trust-years').value
+                };
+            }
+
+            const { error } = await supabaseClient.from('homepage_sections')
+                .upsert({ section_key: key, content: content, active: active }, { onConflict: 'section_key' });
+            
+            if(error) alert("Error saving: " + error.message);
+            else alert("Saved successfully!");
+        }
+
+        document.addEventListener('DOMContentLoaded', loadHomepageCMS);
+    </script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.admin-sidebar').classList.toggle('open');
+            const overlay = document.getElementById('sidebarOverlay');
+            if(overlay) overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

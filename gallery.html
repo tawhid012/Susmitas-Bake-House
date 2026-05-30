@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gallery | Susmita's Bake House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        /* Gallery Filters */
+        .gallery-filters {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+        .gallery-filters::-webkit-scrollbar { display: none; }
+        .filter-btn {
+            background: #f1f5f9;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #475569;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-family: var(--font-body);
+        }
+        .filter-btn.active {
+            background: var(--clr-primary-lavender-dark);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(118, 92, 168, 0.3);
+        }
+
+        /* Premium Grid */
+        .premium-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .gallery-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            aspect-ratio: 1 / 1;
+            cursor: pointer;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+        .gallery-card:active {
+            transform: scale(0.97);
+        }
+        .gallery-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .gallery-card:hover img {
+            transform: scale(1.05);
+        }
+        .gallery-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            color: #fff;
+        }
+        .gallery-card:hover .gallery-overlay {
+            opacity: 1;
+        }
+        .gallery-overlay i {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+        .gallery-overlay span {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 80vh;
+        }
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .lightbox.active .lightbox-img {
+            transform: scale(1);
+        }
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        .lightbox-title {
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            color: #fff;
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="container nav">
+            <a href="index.html" class="nav-logo"><img src="logo.png" alt="Logo"></a>
+            <span style="font-weight: 600; font-size: var(--fs-lg);">Inspiration Gallery</span>
+            <a href="checkout.html" class="cart-icon-wrapper">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-badge">0</span>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div class="container section">
+            <div style="text-align: center; margin-bottom: var(--space-lg);">
+                <p style="color: var(--clr-secondary-brown-light);">Browse our recent custom creations and find inspiration for your next celebration.</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="gallery-filters" id="galleryFilters">
+                <button class="filter-btn active" data-filter="all">All Designs</button>
+                <button class="filter-btn" data-filter="birthdays">Birthdays</button>
+                <button class="filter-btn" data-filter="weddings">Weddings</button>
+                <button class="filter-btn" data-filter="anniversaries">Anniversaries</button>
+                <button class="filter-btn" data-filter="bouquets">Bouquets</button>
+            </div>
+
+            <!-- Dynamic Grid -->
+            <div class="premium-gallery-grid" id="galleryGrid">
+                <!-- Images will be loaded here by JS -->
+            </div>
+
+            <div style="text-align: center; margin-top: var(--space-xl);">
+                <a href="https://www.instagram.com/susmitas_bake_house25/" target="_blank" class="btn btn-secondary">
+                    <i class="fab fa-instagram"></i> View More on Instagram
+                </a>
+            </div>
+        </div>
+
+        <!-- Lightbox Overlay -->
+        <div class="lightbox" id="lightbox">
+            <div class="lightbox-content">
+                <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+                <img src="" alt="Gallery Image" class="lightbox-img" id="lightboxImg">
+                <div class="lightbox-title" id="lightboxTitle">Cake Name</div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="products.html" class="bottom-nav-item">
+            <i class="fas fa-book-open"></i>
+            <span>Menu</span>
+        </a>
+        <a href="custom-order.html" class="bottom-nav-item">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <span>Custom</span>
+        </a>
+        <a href="checkout.html" class="bottom-nav-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Cart <span class="cart-badge" style="position:relative; top:auto; right:auto; display:inline-flex; margin-left:2px;">0</span></span>
+        </a>
+    </nav>
+    <script src="js/cart.js"></script>
+    <script>
+        // Gallery Data
+        const galleryImages = [
+            { id: 1, src: 'hero_cake_1780105814884.png', category: 'weddings', title: 'Elegant Wedding Tier' },
+            { id: 2, src: 'sig_truffle_1780105863136.png', category: 'birthdays', title: 'Chocolate Truffle Dream' },
+            { id: 3, src: 'sig_floral_1780105847644.png', category: 'anniversaries', title: 'Floral Anniversary Cake' },
+            { id: 4, src: 'about_baking_1780105831919.png', category: 'birthdays', title: 'Custom Bento Cake' },
+            { id: 5, src: 'hero_cake_1780105814884.png', category: 'birthdays', title: 'Classic Chocolate' },
+            { id: 6, src: 'sig_floral_1780105847644.png', category: 'weddings', title: 'Rose Gold Beauty' },
+        ];
+
+        const grid = document.getElementById('galleryGrid');
+        const filters = document.querySelectorAll('.filter-btn');
+
+        // Render Grid
+        function renderGallery(filter = 'all') {
+            grid.innerHTML = '';
+            
+            const filteredImages = filter === 'all' 
+                ? galleryImages 
+                : galleryImages.filter(img => img.category === filter);
+
+            filteredImages.forEach(img => {
+                const card = document.createElement('div');
+                card.className = 'gallery-card';
+                card.onclick = () => openLightbox(img.src, img.title);
+                
+                card.innerHTML = `
+                    <img src="${img.src}" alt="${img.title}">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                        <span>${img.title}</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Filter Logic
+        filters.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active state
+                filters.forEach(f => f.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Filter images
+                renderGallery(btn.getAttribute('data-filter'));
+            });
+        });
+
+        // Lightbox Logic
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxTitle = document.getElementById('lightboxTitle');
+
+        function openLightbox(src, title) {
+            lightboxImg.src = src;
+            lightboxTitle.textContent = title;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+        }
+
+        // Close on clicking outside the image
+        lightbox.addEventListener('click', (e) => {
+            if(e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        // Initial Render
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGallery();
+        });
+    </script>
+</body>
+</html>

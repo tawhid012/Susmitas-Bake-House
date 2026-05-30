@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Category Management | Susmita's Bake House Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">Bake House Admin
+                <button class="mobile-close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-link"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="orders.html" class="sidebar-link"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="products.html" class="sidebar-link"><i class="fas fa-cake-candles"></i> Products</a>
+                <a href="categories.html" class="sidebar-link active"><i class="fas fa-tags"></i> Categories</a>
+                <a href="media.html" class="sidebar-link"><i class="fas fa-images"></i> Media Library</a>
+                <a href="customers.html" class="sidebar-link"><i class="fas fa-users"></i> Customers</a>
+                <a href="homepage.html" class="sidebar-link"><i class="fas fa-globe"></i> Homepage CMS</a>
+                <a href="#" class="sidebar-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="admin-header-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <h2>Category Management</h2>
+                </div>
+                <button class="btn-admin" onclick="openCategoryModal()"><i class="fas fa-plus"></i> Add Category</button>
+            </header>
+
+            <div class="admin-content">
+                <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Slug</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categories-list">
+                        <tr><td colspan="5">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="category-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center;">
+        <div style="background:white; padding:30px; border-radius:8px; width:500px; max-width:90%;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h3 id="modal-title">Add / Edit Category</h3>
+                <button onclick="closeCategoryModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            
+            <form id="category-form">
+                <input type="hidden" id="c_id">
+                <div class="form-group">
+                    <label>Category Name</label>
+                    <input type="text" id="c_name" class="form-control" required oninput="document.getElementById('c_slug').value = this.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');">
+                </div>
+                <div class="form-group">
+                    <label>Slug (URL format)</label>
+                    <input type="text" id="c_slug" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Image URL</label>
+                    <input type="text" id="c_image" class="form-control" placeholder="Paste URL from Media Library">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="c_desc" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:20px;">
+                    <label><input type="checkbox" id="c_active" checked> Active</label>
+                </div>
+                <button type="submit" class="btn-admin" style="width:100%;">Save Category</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        async function loadCategories() {
+            const { data, error } = await supabaseClient.from('categories').select('*').order('created_at', { ascending: false });
+            const tbody = document.getElementById('categories-list');
+            tbody.innerHTML = '';
+
+            if(error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="5">Error loading categories.</td></tr>';
+                return;
+            }
+
+            if(data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No categories found.</td></tr>';
+                return;
+            }
+
+            data.forEach(c => {
+                let imgSrc = c.image;
+                if (imgSrc && !imgSrc.startsWith('http')) imgSrc = '../' + imgSrc;
+                const imgHtml = imgSrc ? `<img src="${imgSrc}" width="40" height="40" style="border-radius:4px; object-fit:cover;">` : `<div style="width:40px; height:40px; background:#eee; border-radius:4px;"></div>`;
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${imgHtml}</td>
+                        <td><strong>${c.name}</strong></td>
+                        <td>${c.slug}</td>
+                        <td>${c.active ? '<span style="color:green">Active</span>' : '<span style="color:red">Inactive</span>'}</td>
+                        <td>
+                            <button class="btn-admin" style="padding: 4px 8px; font-size:12px; margin-right:5px;" onclick='editCategory(${JSON.stringify(c).replace(/'/g, "&apos;")})'>Edit</button>
+                            <button class="btn-admin btn-danger" style="padding: 4px 8px; font-size:12px;" onclick="deleteCategory('${c.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openCategoryModal() {
+            document.getElementById('category-form').reset();
+            document.getElementById('c_id').value = '';
+            document.getElementById('modal-title').textContent = 'Add Category';
+            document.getElementById('category-modal').style.display = 'flex';
+        }
+
+        function closeCategoryModal() {
+            document.getElementById('category-modal').style.display = 'none';
+        }
+
+        function editCategory(c) {
+            document.getElementById('modal-title').textContent = 'Edit Category';
+            document.getElementById('c_id').value = c.id;
+            document.getElementById('c_name').value = c.name;
+            document.getElementById('c_slug').value = c.slug;
+            document.getElementById('c_image').value = c.image || '';
+            document.getElementById('c_desc').value = c.description || '';
+            document.getElementById('c_active').checked = c.active;
+            
+            document.getElementById('category-modal').style.display = 'flex';
+        }
+
+        document.getElementById('category-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('c_id').value;
+            
+            const payload = {
+                name: document.getElementById('c_name').value,
+                slug: document.getElementById('c_slug').value,
+                image: document.getElementById('c_image').value,
+                description: document.getElementById('c_desc').value,
+                active: document.getElementById('c_active').checked
+            };
+
+            if (id) {
+                const { error } = await supabaseClient.from('categories').update(payload).eq('id', id);
+                if(error) alert(error.message);
+                else { closeCategoryModal(); loadCategories(); }
+            } else {
+                const { error } = await supabaseClient.from('categories').insert([payload]);
+                if(error) alert(error.message);
+                else { closeCategoryModal(); loadCategories(); }
+            }
+        });
+
+        async function deleteCategory(id) {
+            if(confirm("Are you sure you want to delete this category? (Products will become uncategorized)")) {
+                await supabaseClient.from('categories').delete().eq('id', id);
+                loadCategories();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCategories);
+    </script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.admin-sidebar').classList.toggle('open');
+            const overlay = document.getElementById('sidebarOverlay');
+            if(overlay) overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

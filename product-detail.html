@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chocolate Truffle Cake | Susmita's Bake House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body style="padding-bottom: 140px;">
+
+    <header class="header">
+        <div class="container nav" style="height: 60px;">
+            <a href="javascript:history.back()" style="font-size: 1.5rem; color: var(--clr-secondary-brown);"><i class="fas fa-arrow-left"></i></a>
+            <span style="font-weight: 600;">Product Details</span>
+            <a href="checkout.html" class="cart-icon-wrapper">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-badge">0</span>
+            </a>
+        </div>
+    </header>
+
+    <main style="padding-top: 60px;">
+        <div class="detail-gallery">
+            <img id="product-image" src="" alt="Cake Image">
+        </div>
+
+        <div class="container">
+            <div class="detail-info-card">
+                <h1 style="font-size: var(--fs-2xl); line-height: 1.2; margin-bottom: 0.5rem;" id="product-name">Loading...</h1>
+                
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <span class="price-bold" style="font-size: var(--fs-2xl);" id="product-price" data-base-price="0">₹0</span>
+                </div>
+
+                <p id="product-description" style="color: var(--clr-secondary-brown-light); line-height: 1.6; margin-bottom: var(--space-md);">
+                </p>
+
+                <!-- Customization Form -->
+                <form id="add-to-cart-form" style="margin-top: var(--space-lg); border-top: 1px solid var(--clr-primary-lavender-light); padding-top: var(--space-md);">
+                    <h3 id="form-heading" style="margin-bottom: var(--space-md);">Customize Your Cake</h3>
+                    
+                    <div class="form-group" id="group-weight">
+                        <label class="form-label">Weight *</label>
+                        <select id="p_weight" class="form-control" onchange="updatePrice()" required>
+                            <option value="500g" data-price="850">500g (Half Kg) - ₹850</option>
+                            <option value="1kg" data-price="1600">1 kg - ₹1600</option>
+                            <option value="1.5kg" data-price="2300">1.5 kg - ₹2300</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="group-diet">
+                        <label class="form-label">Dietary Preference *</label>
+                        <select id="p_diet" class="form-control" onchange="updatePrice()" required>
+                            <option value="With Egg">With Egg</option>
+                            <option value="Eggless">Eggless (+₹50)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="group-message">
+                        <label class="form-label" id="label-message">Message on Cake</label>
+                        <input type="text" id="p_message" class="form-control" placeholder="e.g. Happy Birthday!">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <div class="qty-control" style="width: 120px; justify-content: space-between;">
+                            <button type="button" class="qty-btn" onclick="document.getElementById('p_qty').value = Math.max(1, parseInt(document.getElementById('p_qty').value) - 1)">-</button>
+                            <input type="number" id="p_qty" value="1" min="1" style="width: 40px; text-align: center; border: none; background: transparent; font-weight: bold; outline: none;">
+                            <button type="button" class="qty-btn" onclick="document.getElementById('p_qty').value = parseInt(document.getElementById('p_qty').value) + 1">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Add Button -->
+                    <button type="button" onclick="addToCart()" class="btn btn-primary btn-block" style="display: none;" id="desktop-order-btn">
+                        <i class="fas fa-shopping-bag"></i> Add to Cart
+                    </button>
+                    <style>@media (min-width: 768px) { #desktop-order-btn { display: flex !important; } }</style>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sticky Bottom Order Bar (Mobile) -->
+    <div class="sticky-order-bar">
+        <div class="sticky-price-info">
+            <span style="font-size: var(--fs-sm); color: var(--clr-secondary-brown-light);">Total</span>
+            <span class="price-bold" id="sticky-price">₹850</span>
+        </div>
+        <button type="button" onclick="addToCart()" class="btn btn-primary" style="padding: 0.8rem 2rem;">
+            Add to Cart <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/api.js?v=7"></script>
+    <script src="js/cart.js?v=2"></script>
+    <script>
+        let currentProduct = null;
+        let isCake = true; // Global flag
+
+        async function loadProductDetail() {
+            if(typeof API === 'undefined') return;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const slug = urlParams.get('slug');
+
+            if(!slug) {
+                document.querySelector('main').innerHTML = '<div class="container" style="padding: 100px 0; text-align:center;"><h2>Product not found</h2><a href="products.html" class="btn btn-primary">Back to Menu</a></div>';
+                return;
+            }
+
+            const product = await API.getProductBySlug(slug);
+            if(!product) {
+                document.querySelector('main').innerHTML = '<div class="container" style="padding: 100px 0; text-align:center;"><h2>Product not found</h2><a href="products.html" class="btn btn-primary">Back to Menu</a></div>';
+                return;
+            }
+
+            currentProduct = product;
+            
+            // Determine if it's a cake to toggle form fields
+            isCake = true;
+            if(product.category_id) {
+                const categories = await API.getCategories();
+                const category = categories.find(c => c.id === product.category_id);
+                if(category && ['bouquets', 'keychains', 'personalised-gifts'].includes(category.slug)) {
+                    isCake = false;
+                }
+            }
+
+            // Populate DOM
+            document.title = product.name + " | Susmita's Bake House";
+            document.getElementById('product-name').textContent = product.name;
+            document.getElementById('product-price').textContent = '₹' + product.base_price;
+            document.getElementById('product-price').setAttribute('data-base-price', product.base_price);
+            document.getElementById('sticky-price').textContent = '₹' + product.base_price;
+            document.getElementById('product-description').textContent = product.description || product.short_description || '';
+            
+            const imgUrl = product.image_url ? (product.image_url.startsWith('http') ? product.image_url : product.image_url) : 'hero_cake_1780105814884.png';
+            document.getElementById('product-image').src = imgUrl;
+
+            // Adapt Form based on isCake
+            if(!isCake) {
+                document.getElementById('form-heading').textContent = 'Customize Your Order';
+                document.getElementById('group-weight').style.display = 'none';
+                document.getElementById('group-diet').style.display = 'none';
+                document.getElementById('label-message').textContent = 'Special Instructions (Optional)';
+                document.getElementById('p_message').placeholder = 'e.g. Please wrap it beautifully';
+            } else {
+                // Populate weights based on base price for cakes
+                const wSelect = document.getElementById('p_weight');
+                wSelect.innerHTML = `
+                    <option value="500g" data-price="${product.base_price}">500g (Half Kg) - ₹${product.base_price}</option>
+                    <option value="1kg" data-price="${Math.round(product.base_price * 1.8)}">1 kg - ₹${Math.round(product.base_price * 1.8)}</option>
+                    <option value="1.5kg" data-price="${Math.round(product.base_price * 2.6)}">1.5 kg - ₹${Math.round(product.base_price * 2.6)}</option>
+                `;
+            }
+        }
+
+        function updatePrice() {
+            if(!isCake || !currentProduct) return; // Non-cakes have a fixed price per quantity
+            
+            const select = document.getElementById('p_weight');
+            const price = select.options[select.selectedIndex].getAttribute('data-price');
+            const dietSelect = document.getElementById('p_diet');
+            let finalPrice = parseInt(price);
+            if(dietSelect && dietSelect.value === 'Eggless') {
+                finalPrice += 50;
+            }
+            document.getElementById('product-price').textContent = `₹${finalPrice}`;
+            document.getElementById('product-price').setAttribute('data-base-price', finalPrice);
+            if(document.getElementById('sticky-price')) {
+                document.getElementById('sticky-price').textContent = `₹${finalPrice}`;
+            }
+        }
+
+        function addToCart() {
+            if(!currentProduct) return;
+            const name = document.getElementById('product-name').textContent;
+            const price = parseInt(document.getElementById('product-price').getAttribute('data-base-price'));
+            const qty = parseInt(document.getElementById('p_qty').value);
+            
+            const weight = isCake ? document.getElementById('p_weight').value : 'Standard';
+            const diet = isCake ? document.getElementById('p_diet').value : 'N/A';
+            const message = document.getElementById('p_message').value;
+            
+            const imgUrl = currentProduct.image_url ? (currentProduct.image_url.startsWith('http') ? currentProduct.image_url : currentProduct.image_url) : 'hero_cake_1780105814884.png';
+
+            const item = {
+                id: currentProduct.id,
+                name: name,
+                price: price,
+                quantity: qty,
+                image: imgUrl,
+                options: { weight: weight, diet: diet, message: message, type: 'standard' }
+            };
+
+            bakeryCart.addItem(item);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadProductDetail);
+    </script>
+</body>
+</html>

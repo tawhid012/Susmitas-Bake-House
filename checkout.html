@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checkout | Susmita's Bake House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body style="padding-bottom: 80px; background-color: var(--clr-base-cream);">
+
+    <header class="header">
+        <div class="container nav" style="height: 60px;">
+            <a href="javascript:history.back()" style="font-size: 1.5rem; color: var(--clr-secondary-brown);"><i class="fas fa-arrow-left"></i></a>
+            <span style="font-weight: 600;">Checkout</span>
+            <div style="width: 24px;"></div> <!-- Spacer -->
+        </div>
+    </header>
+
+    <main style="padding-top: 60px;">
+        <div class="container">
+            
+            <!-- Empty Cart State -->
+            <div id="empty-cart-msg" style="display: none; text-align: center; padding: var(--space-xl) 0;">
+                <i class="fas fa-shopping-basket" style="font-size: 4rem; color: var(--clr-primary-lavender-dark); margin-bottom: var(--space-md);"></i>
+                <h2 style="margin-bottom: var(--space-sm);">Your cart is empty</h2>
+                <p style="color: var(--clr-secondary-brown-light); margin-bottom: var(--space-lg);">Looks like you haven't added anything to your cart yet.</p>
+                <a href="products.html" class="btn btn-primary">Browse Menu</a>
+            </div>
+
+            <!-- Checkout Layout -->
+            <div id="checkout-content" class="grid grid-cols-2" style="gap: 2rem; margin-top: 1rem;">
+                
+                <!-- Left Column: Items & Total -->
+                <div>
+                    <h2 style="font-size: 1.1rem; font-weight: 700; color: #282c3f; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Order Summary</h2>
+                    <div style="background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); padding: 1.5rem; margin-bottom: 1.5rem;">
+                        <div id="cart-items-container">
+                            <!-- Items injected via JS -->
+                        </div>
+                        
+                        <div style="border-top: 2px dashed #e9e9eb; padding-top: 1rem; margin-top: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 1.1rem; color: #282c3f;">
+                                <span>Estimated Total</span>
+                                <span id="cart-total-price">₹0</span>
+                            </div>
+                            <p style="font-size: 0.75rem; color: #686b78; text-align: right; margin-top: 0.4rem;">*Final price confirmed on WhatsApp</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Checkout Form -->
+                <div>
+                    <h2 style="font-size: 1.1rem; font-weight: 700; color: #282c3f; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.5px;">Delivery Details</h2>
+                    <div style="background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.03); padding: 1.5rem;">
+                        <form id="checkout-form">
+                            
+                            <h3 style="font-size: 0.9rem; font-weight: 700; color: #3e4152; margin-bottom: 0.8rem; margin-top: 0;">Customer Info</h3>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <input type="text" id="c_name" class="form-control" placeholder="Full Name *" style="border: 1px solid #e9e9eb; border-radius: 8px; background: #fafafa; padding: 12px 16px;" required>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <input type="tel" id="c_phone" class="form-control" placeholder="WhatsApp Number *" style="border: 1px solid #e9e9eb; border-radius: 8px; background: #fafafa; padding: 12px 16px;" required>
+                            </div>
+
+                            <h3 style="font-size: 0.9rem; font-weight: 700; color: #3e4152; margin-bottom: 0.8rem;">Delivery Info</h3>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <input type="text" id="c_address" class="form-control" placeholder="Full Delivery Address (Hailakandi) *" style="border: 1px solid #e9e9eb; border-radius: 8px; background: #fafafa; padding: 12px 16px;" required>
+                            </div>
+                            <div class="form-group" style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                                <div style="flex: 1;">
+                                    <label class="form-label" style="font-size: 0.75rem; color: #686b78; margin-bottom: 4px;">Date *</label>
+                                    <input type="date" id="c_date" class="form-control" style="border: 1px solid #e9e9eb; border-radius: 8px; background: #fafafa; padding: 10px 14px;" required>
+                                </div>
+                                <div style="flex: 1;">
+                                    <label class="form-label" style="font-size: 0.75rem; color: #686b78; margin-bottom: 4px;">Time *</label>
+                                    <input type="time" id="c_time" class="form-control" style="border: 1px solid #e9e9eb; border-radius: 8px; background: #fafafa; padding: 10px 14px;" required>
+                                </div>
+                            </div>
+
+                            <h3 style="font-size: 0.9rem; font-weight: 700; color: #3e4152; margin-bottom: 0.8rem;">Order Notes</h3>
+                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <textarea id="c_notes" class="form-control" rows="2" placeholder="Any special delivery instructions?" style="border: 1px solid #e9e9eb; border-radius: 8px; background: #fafafa; padding: 12px 16px;"></textarea>
+                            </div>
+
+                            <button type="button" onclick="submitOrder()" class="btn btn-primary btn-block" style="background-color: #25D366; color: white; border: none; box-shadow: 0 4px 14px rgba(37,211,102,0.3); border-radius: 12px; padding: 16px; font-weight: 700; font-size: 1.1rem; transition: all 0.3s ease;">
+                                <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i> Place Order on WhatsApp
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="products.html" class="bottom-nav-item">
+            <i class="fas fa-book-open"></i>
+            <span>Menu</span>
+        </a>
+        <a href="custom-order.html" class="bottom-nav-item">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <span>Custom</span>
+        </a>
+        <a href="checkout.html" class="bottom-nav-item active">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Cart <span class="cart-badge" style="position:relative; top:auto; right:auto; display:inline-flex; margin-left:2px;">0</span></span>
+        </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/api.js?v=7"></script>
+    <script src="js/cart.js?v=2"></script>
+    <script>
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const checkoutContent = document.getElementById('checkout-content');
+            const emptyMsg = document.getElementById('empty-cart-msg');
+            
+            if (bakeryCart.items.length === 0) {
+                checkoutContent.style.display = 'none';
+                emptyMsg.style.display = 'block';
+                return;
+            }
+
+            checkoutContent.style.display = 'grid'; // Need media query logic or flex for mobile, assuming grid works
+            if(window.innerWidth < 768) { checkoutContent.style.gridTemplateColumns = '1fr'; }
+            
+            emptyMsg.style.display = 'none';
+            container.innerHTML = '';
+
+            bakeryCart.items.forEach((item, index) => {
+                let optionsHtml = '';
+                if(item.options.type === 'custom') {
+                    optionsHtml = `Theme: ${item.name.replace('Custom Cake: ','')}<br>Flavor: ${item.options.flavor} • Wt: ${item.options.weight}`;
+                    if(item.options.hasInspirationImage) optionsHtml += `<br><span style="color:#1ba672; font-weight:600;">[Image Attached]</span>`;
+                } else {
+                    optionsHtml = `${item.options.diet} • ${item.options.weight}`;
+                }
+
+                if(item.options.message) {
+                    optionsHtml += `<br>Msg: "${item.options.message}"`;
+                }
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                itemDiv.style.cssText = 'display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #f0f0f5;';
+                itemDiv.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+                    <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <h4 style="font-weight: 700; font-size: 0.95rem; color: #282c3f; margin-bottom: 0.2rem;">${item.name}</h4>
+                        <p style="font-size: 0.75rem; color: #686b78; margin-bottom: 0.5rem; line-height: 1.4;">${optionsHtml}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+                            <span style="font-weight: 600; font-size: 0.95rem; color: #3e4152;">₹${item.price}</span>
+                            <div style="display: inline-flex; align-items: center; background: #fff; border: 1px solid #e9e9eb; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <button style="background: none; border: none; padding: 4px 10px; font-weight: 700; color: #1ba672; cursor: pointer; font-size: 1rem;" onclick="bakeryCart.updateQuantity(${index}, ${item.quantity - 1}); renderCart();">-</button>
+                                <span style="font-size: 0.85rem; font-weight: 700; padding: 0 4px; color: #282c3f;">${item.quantity}</span>
+                                <button style="background: none; border: none; padding: 4px 10px; font-weight: 700; color: #1ba672; cursor: pointer; font-size: 1rem;" onclick="bakeryCart.updateQuantity(${index}, ${item.quantity + 1}); renderCart();">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+
+            document.getElementById('cart-total-price').textContent = `₹${bakeryCart.getTotal()}`;
+        }
+
+        // Handle resize for grid layout on mobile
+        window.addEventListener('resize', () => {
+            if(bakeryCart.items.length > 0) {
+                document.getElementById('checkout-content').style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : 'repeat(2, 1fr)';
+            }
+        });
+
+        // Initialize
+        renderCart();
+
+        async function submitOrder() {
+            const name = document.getElementById('c_name').value;
+            const phone = document.getElementById('c_phone').value;
+            const address = document.getElementById('c_address').value;
+            const date = document.getElementById('c_date').value;
+            const time = document.getElementById('c_time').value;
+            const notes = document.getElementById('c_notes').value;
+
+            if(!name || !phone || !address || !date || !time) {
+                alert("Please fill in all required delivery details.");
+                return;
+            }
+
+            // 1. Format order for Supabase
+            const orderData = {
+                customer_name: name,
+                phone: phone,
+                address: address,
+                delivery_date: date,
+                delivery_time: time,
+                notes: notes,
+                total_amount: bakeryCart.getTotal()
+            };
+
+            // 2. Save to Supabase DB (Requires API to be loaded)
+            let orderNumber = "PENDING";
+            if(typeof API !== 'undefined') {
+                try {
+                    // Temporarily disable the button
+                    const btn = document.querySelector('button[onclick="submitOrder()"]');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = 'Processing...';
+                    btn.disabled = true;
+
+                    orderNumber = await API.createOrder(orderData, bakeryCart.items) || orderNumber;
+                } catch(e) {
+                    console.error("Failed to save order to DB:", e);
+                }
+            }
+
+            // 3. Generate WhatsApp Message
+            let text = `*NEW ORDER: ${orderNumber}*%0A%0A`;
+            text += `*Customer:* ${name}%0A`;
+            text += `*Phone:* ${phone}%0A`;
+            text += `*Address:* ${address}%0A`;
+            text += `*Date:* ${date} at ${time}%0A`;
+            text += `%0A*ORDER ITEMS:*%0A`;
+
+            let hasImageAttachment = false;
+
+            bakeryCart.items.forEach((item, idx) => {
+                text += `%0A${idx + 1}. *${item.name}* (Qty: ${item.quantity})%0A`;
+                text += `   Price: ₹${item.price * item.quantity}%0A`;
+                
+                if(item.options.type === 'custom') {
+                    text += `   Flavor: ${item.options.flavor}%0A`;
+                    text += `   Weight: ${item.options.weight}%0A`;
+                    if(item.options.colors) text += `   Colors: ${item.options.colors}%0A`;
+                    if(item.options.hasInspirationImage) {
+                        text += `   *NOTE: I have an inspiration image to send you!*%0A`;
+                        hasImageAttachment = true;
+                    }
+                    if(item.options.instructions) text += `   Instructions: ${item.options.instructions}%0A`;
+                } else {
+                    text += `   Details: ${item.options.diet}, ${item.options.weight}%0A`;
+                }
+                if(item.options.message) text += `   Message: "${item.options.message}"%0A`;
+            });
+
+            text += `%0A*Est Total: ₹${bakeryCart.getTotal()}*%0A`;
+
+            if(notes) text += `%0A*Notes:* ${notes}%0A`;
+            
+            if(hasImageAttachment) {
+                text += `%0A_(I will attach the inspiration image shortly)_%0A`;
+            }
+
+            text += `%0APlease confirm availability.`;
+
+            // Clear Cart
+            bakeryCart.clear();
+
+            // Redirect to WA
+            const waLink = `https://wa.me/917099747401?text=${text}`;
+            window.location.href = waLink;
+        }
+    </script>
+</body>
+</html>

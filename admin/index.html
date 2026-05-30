@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard | Susmita's Bake House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                Bake House Admin
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-link active"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="orders.html" class="sidebar-link"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="products.html" class="sidebar-link"><i class="fas fa-cake-candles"></i> Products</a>
+                <a href="categories.html" class="sidebar-link"><i class="fas fa-tags"></i> Categories</a>
+                <a href="#" class="sidebar-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="admin-header-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <h2>Dashboard Overview</h2>
+                </div>
+                <div id="admin-user-email"></div>
+            </header>
+
+            <div class="admin-content">
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-title">Total Orders</div>
+                        <div class="stat-value" id="stat-orders">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Pending Orders</div>
+                        <div class="stat-value" id="stat-pending">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">Total Products</div>
+                        <div class="stat-value" id="stat-products">-</div>
+                    </div>
+                </div>
+
+                <h3>Recent Orders</h3>
+                <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recent-orders-list">
+                        <tr><td colspan="5">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        async function loadDashboardData() {
+            // Update User Email
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if(session) {
+                document.getElementById('admin-user-email').textContent = session.user.email;
+            }
+
+            // Fetch Stats
+            const { count: ordersCount } = await supabaseClient.from('orders').select('*', { count: 'exact', head: true });
+            const { count: pendingCount } = await supabaseClient.from('orders').select('*', { count: 'exact', head: true }).eq('order_status', 'Pending');
+            const { count: productsCount } = await supabaseClient.from('products').select('*', { count: 'exact', head: true });
+            
+            document.getElementById('stat-orders').textContent = ordersCount || 0;
+            document.getElementById('stat-pending').textContent = pendingCount || 0;
+            document.getElementById('stat-products').textContent = productsCount || 0;
+
+            // Fetch Recent Orders
+            const { data: orders } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false }).limit(5);
+            const tbody = document.getElementById('recent-orders-list');
+            tbody.innerHTML = '';
+            
+            if(orders && orders.length > 0) {
+                orders.forEach(order => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${order.order_number}</td>
+                            <td>${order.customer_name}</td>
+                            <td>${new Date(order.created_at).toLocaleDateString()}</td>
+                            <td><span style="background:#FEF3C7; color:#92400E; padding:3px 8px; border-radius:12px; font-size:12px;">${order.order_status}</span></td>
+                            <td><button class="btn-admin" style="padding: 4px 8px; font-size:12px;">View</button></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5">No orders found.</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardData();
+        });
+    </script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.admin-sidebar').classList.toggle('open');
+            const overlay = document.getElementById('sidebarOverlay');
+            if(overlay) overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

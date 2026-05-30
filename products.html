@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Menu | Susmita's Bake House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="container nav">
+            <a href="index.html" class="nav-logo"><img src="logo.png" alt="Logo"></a>
+            <div style="flex-grow: 1;"></div>
+            <a href="checkout.html" class="cart-icon-wrapper" style="margin-right: var(--space-md);">
+                <i class="fas fa-shopping-bag"></i>
+                <span class="cart-badge">0</span>
+            </a>
+            <a href="https://wa.me/917099747401" class="btn btn-primary" style="padding: 0.4rem 1rem;"><i class="fab fa-whatsapp"></i> Chat</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Sticky Horizontal Categories -->
+        <div class="sticky-categories">
+            <div class="container" id="category-container" style="display: flex; gap: 0.5rem;">
+                <button class="category-chip active">All</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="search-bar-wrapper" style="margin-top: var(--space-md);">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Search for cakes or flavors...">
+            </div>
+
+            <div style="margin-top: var(--space-md);">
+                <h2 style="font-size: var(--fs-xl); margin-bottom: var(--space-md);">All Items</h2>
+                <div id="menu-container" class="grid grid-cols-3 grid-mobile-2">
+                    <p>Loading menu...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="index.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="products.html" class="bottom-nav-item active">
+            <i class="fas fa-book-open"></i>
+            <span>Menu</span>
+        </a>
+        <a href="custom-order.html" class="bottom-nav-item">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <span>Custom</span>
+        </a>
+        <a href="checkout.html" class="bottom-nav-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Cart <span class="cart-badge" style="position:relative; top:auto; right:auto; display:inline-flex; margin-left:2px;">0</span></span>
+        </a>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js?v=3"></script>
+    <script src="js/api.js?v=7"></script>
+    <script src="js/cart.js?v=2"></script>
+    <script>
+        async function loadMenu() {
+            if(typeof API === 'undefined') return;
+
+            // Load Categories
+            const categories = await API.getCategories();
+            const catContainer = document.getElementById('category-container');
+            if(categories && categories.length > 0) {
+                let catHtml = `<button class="category-chip active" onclick="filterMenu('all', this)">All</button>`;
+                categories.forEach(c => {
+                    catHtml += `<button class="category-chip" onclick="filterMenu('${c.id}', this)">${c.name}</button>`;
+                });
+                catContainer.innerHTML = catHtml;
+            }
+
+            // Load Products
+            window.allProducts = await API.getProducts();
+            renderProducts(window.allProducts);
+        }
+
+        function renderProducts(filteredProducts) {
+            const container = document.getElementById('menu-container');
+            container.innerHTML = '';
+            if(filteredProducts.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: var(--space-xl); color: var(--clr-secondary-brown-light);">No products found.</div>';
+                return;
+            }
+
+            filteredProducts.forEach(p => {
+                const badge = p.bestseller ? `<span class="app-product-badge">Bestseller</span>` : '';
+                const imgUrl = p.image_url ? (p.image_url.startsWith('http') ? p.image_url : p.image_url) : 'hero_cake_1780105814884.png';
+                
+                container.innerHTML += `
+                    <div class="app-product-card">
+                        <div class="app-product-img">
+                            ${badge}
+                            <img src="${imgUrl}" alt="${p.name}">
+                            <a href="product-detail.html?slug=${p.slug}" class="btn-add-overlap">ADD</a>
+                        </div>
+                        <div class="app-product-info">
+                            <div class="app-product-header">
+                                <h4 class="app-product-title">${p.name}</h4>
+                                <span class="app-product-rating"><i class="fas fa-star" style="font-size: 8px;"></i> 4.9</span>
+                            </div>
+                            <p class="app-product-price">${p.short_description || 'Premium Custom Design'}</p>
+                            <div class="app-product-actions">
+                                <span class="price-bold">₹${p.base_price}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function filterMenu(categoryId, btn) {
+            // Update active state
+            document.querySelectorAll('.category-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Filter products
+            if(categoryId === 'all') {
+                renderProducts(window.allProducts);
+            } else {
+                renderProducts(window.allProducts.filter(p => p.category_id === categoryId));
+            }
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = window.allProducts.filter(p => p.name.toLowerCase().includes(val) || (p.short_description && p.short_description.toLowerCase().includes(val)));
+            renderProducts(filtered);
+        });
+
+        document.addEventListener('DOMContentLoaded', loadMenu);
+    </script>
+</body>
+</html>

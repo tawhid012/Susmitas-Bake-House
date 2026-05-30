@@ -1,0 +1,118 @@
+/* ==========================================================================
+   DESIGN SYSTEM & CSS VARIABLES
+   Based on the official Susmita's Bake House Logo
+   ========================================================================== */
+
+:root {
+  /* Primary Colors - Extracted from Logo */
+  --clr-primary-lavender: #D0C4F2;
+  --clr-primary-lavender-light: #E6DDF7;
+  --clr-primary-lavender-dark: #B6A2E8;
+
+  /* Secondary Colors */
+  --clr-secondary-brown: #4A3320;
+  --clr-secondary-brown-light: #6A4B31;
+
+  /* Accents */
+  --clr-accent-beige: #DEB89C;
+  --clr-accent-beige-light: #EED2BE;
+  
+  /* Neutrals & Base */
+  --clr-base-cream: #FFF8F0;
+  --clr-base-white: #FFFFFF;
+  --clr-base-dark: #2C1E12;
+
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Poppins', sans-serif;
+
+  /* Font Sizes - Mobile First Scale */
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 2rem;
+  --fs-3xl: 2.5rem;
+  --fs-4xl: 3rem;
+
+  /* Desktop Font Sizes */
+  @media (min-width: 768px) {
+    --fs-base: 1.125rem;
+    --fs-lg: 1.25rem;
+    --fs-xl: 1.75rem;
+    --fs-2xl: 2.5rem;
+    --fs-3xl: 3.5rem;
+    --fs-4xl: 4.5rem;
+  }
+
+  /* Spacing */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+  --space-section: 5rem;
+  
+  /* Shadows - Soft & Premium */
+  --shadow-sm: 0 2px 4px rgba(74, 51, 32, 0.05);
+  --shadow-md: 0 4px 8px rgba(74, 51, 32, 0.08);
+  --shadow-lg: 0 10px 20px rgba(74, 51, 32, 0.12);
+  --shadow-hover: 0 15px 30px rgba(74, 51, 32, 0.15);
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 9999px;
+
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Reset & Typography Setup */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--clr-base-cream);
+  color: var(--clr-secondary-brown);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--clr-secondary-brown);
+  line-height: 1.2;
+  font-weight: 600;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color var(--transition-fast);
+}
+
+img, picture, svg {
+  max-width: 100%;
+  display: block;
+}
+
+/* Custom Selection */
+::selection {
+  background-color: var(--clr-primary-lavender);
+  color: var(--clr-secondary-brown);
+}

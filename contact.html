@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contact | Susmita's Bake House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/design-system.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="container nav">
+            <a href="index.html" class="nav-logo"><img src="logo.png" alt="Logo"></a>
+            <span style="font-weight: 600; font-size: var(--fs-lg);">Contact Us</span>
+            <div style="width: 50px;"></div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container section">
+            <div class="card" style="max-width: 600px; margin: 0 auto; padding: var(--space-xl);">
+                <div style="text-align: center; margin-bottom: var(--space-lg);">
+                    <img src="logo.png" alt="Logo" style="height: 80px; margin-bottom: var(--space-md);">
+                    <h2>We'd Love to Hear From You!</h2>
+                </div>
+
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 1.5rem;">
+                    <li style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--clr-primary-lavender-light); display: flex; align-items: center; justify-content: center; color: var(--clr-primary-lavender-dark); font-size: 1.5rem;"><i class="fab fa-whatsapp"></i></div>
+                        <div>
+                            <strong style="display:block;">WhatsApp Us</strong>
+                            <a href="https://wa.me/917099747401" style="color: var(--clr-primary-lavender-dark); font-weight: 500;">+91 7099747401</a>
+                        </div>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--clr-primary-lavender-light); display: flex; align-items: center; justify-content: center; color: var(--clr-primary-lavender-dark); font-size: 1.5rem;"><i class="fab fa-instagram"></i></div>
+                        <div>
+                            <strong style="display:block;">Instagram</strong>
+                            <a href="https://www.instagram.com/susmitas_bake_house25/" target="_blank" style="color: var(--clr-primary-lavender-dark); font-weight: 500;">@susmitas_bake_house25</a>
+                        </div>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--clr-primary-lavender-light); display: flex; align-items: center; justify-content: center; color: var(--clr-primary-lavender-dark); font-size: 1.5rem;"><i class="fas fa-location-dot"></i></div>
+                        <div>
+                            <strong style="display:block;">Location & Delivery</strong>
+                            <span style="color: var(--clr-secondary-brown-light);">Hailakandi Puran Bazzar Near Ekart Office 📍</span>
+                        </div>
+                    </li>
+                    <li style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background-color: var(--clr-primary-lavender-light); display: flex; align-items: center; justify-content: center; color: var(--clr-primary-lavender-dark); font-size: 1.5rem;"><i class="far fa-clock"></i></div>
+                        <div>
+                            <strong style="display:block;">Business Hours</strong>
+                            <span style="color: var(--clr-secondary-brown-light);">Mon - Sun: 9:00 AM - 8:00 PM</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="bottom-nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="products.html" class="bottom-nav-item">
+            <i class="fas fa-book-open"></i>
+            <span>Menu</span>
+        </a>
+        <a href="custom-order.html" class="bottom-nav-item">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <span>Custom</span>
+        </a>
+        <a href="contact.html" class="bottom-nav-item active"> <!-- Reusing gallery slot in nav for contact -->
+            <i class="fas fa-address-book"></i>
+            <span>Contact</span>
+        </a>
+    </nav>
+</body>
+</html>

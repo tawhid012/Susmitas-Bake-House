@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Management | Susmita's Bake House Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">Bake House Admin
+                <button class="mobile-close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-link"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="orders.html" class="sidebar-link active"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="products.html" class="sidebar-link"><i class="fas fa-cake-candles"></i> Products</a>
+                <a href="homepage.html" class="sidebar-link"><i class="fas fa-globe"></i> Homepage CMS</a>
+                <a href="#" class="sidebar-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="admin-header-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <h2>Order Management</h2>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                    <input type="text" id="search-orders" class="form-control" placeholder="Search Order # or Customer" style="width: 300px;">
+                    <select id="filter-status" class="form-control" style="width: 200px;">
+                        <option value="All">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Baking">Baking</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Out For Delivery">Out For Delivery</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date / Time</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-list">
+                        <tr><td colspan="6">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Order Details -->
+    <div id="order-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100; align-items:center; justify-content:center;">
+        <div style="background:white; padding:30px; border-radius:8px; width:600px; max-width:90%; max-height:90vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h3 id="modal-order-title">Order Details</h3>
+                <button onclick="closeModal()" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            
+            <div style="margin-bottom:20px; padding:15px; background:#F3F4F6; border-radius:4px;">
+                <div class="form-group">
+                    <label>Update Status</label>
+                    <div style="display:flex; gap:10px;">
+                        <select id="modal-status" class="form-control">
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Baking">Baking</option>
+                            <option value="Ready">Ready</option>
+                            <option value="Out For Delivery">Out For Delivery</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        <button class="btn-admin" onclick="updateOrderStatus()">Save Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modal-order-content"></div>
+        </div>
+    </div>
+
+    <script src="../js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let allOrders = [];
+        let currentOrderId = null;
+
+        async function loadOrders() {
+            const { data, error } = await supabaseClient.from('orders').select('*, order_items(*)').order('created_at', { ascending: false });
+            if (error) {
+                console.error(error);
+                return;
+            }
+            allOrders = data;
+            renderOrders(data);
+        }
+
+        function renderOrders(orders) {
+            const tbody = document.getElementById('orders-list');
+            tbody.innerHTML = '';
+            
+            if(orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No orders found.</td></tr>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const statusColor = getStatusColor(order.order_status);
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${order.order_number}</strong></td>
+                        <td>${order.customer_name}<br><small style="color:#6B7280">${order.phone}</small></td>
+                        <td>${order.delivery_date} <br><small style="color:#6B7280">${order.delivery_time}</small></td>
+                        <td>₹${order.total_amount}</td>
+                        <td><span style="background:${statusColor.bg}; color:${statusColor.text}; padding:3px 8px; border-radius:12px; font-size:12px;">${order.order_status}</span></td>
+                        <td><button class="btn-admin" style="padding: 4px 8px; font-size:12px;" onclick="viewOrder('${order.id}')">View</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Pending': return {bg: '#FEF3C7', text: '#92400E'};
+                case 'Confirmed': return {bg: '#DBEAFE', text: '#1E40AF'};
+                case 'Baking': return {bg: '#F3E8FF', text: '#6B21A8'};
+                case 'Delivered': return {bg: '#D1FAE5', text: '#065F46'};
+                case 'Cancelled': return {bg: '#FEE2E2', text: '#991B1B'};
+                default: return {bg: '#E5E7EB', text: '#374151'};
+            }
+        }
+
+        function viewOrder(id) {
+            const order = allOrders.find(o => o.id === id);
+            if(!order) return;
+            
+            currentOrderId = id;
+            document.getElementById('modal-order-title').textContent = `Order ${order.order_number}`;
+            document.getElementById('modal-status').value = order.order_status;
+            
+            let itemsHtml = '<h4 style="margin-top:20px; margin-bottom:10px;">Items</h4><ul style="padding-left:20px; margin-bottom:20px;">';
+            order.order_items.forEach(item => {
+                itemsHtml += `<li><strong>${item.quantity}x ${item.product_name}</strong> - ₹${item.price * item.quantity}
+                    <br><small style="color:#6B7280">${item.flavor} | ${item.weight}</small>
+                </li>`;
+            });
+            itemsHtml += '</ul>';
+
+            document.getElementById('modal-order-content').innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                    <div>
+                        <h4 style="margin-bottom:10px;">Customer</h4>
+                        <p><strong>${order.customer_name}</strong><br>${order.phone}<br>${order.address}</p>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:10px;">Delivery</h4>
+                        <p><strong>Date:</strong> ${order.delivery_date}<br><strong>Time:</strong> ${order.delivery_time}</p>
+                    </div>
+                </div>
+                ${itemsHtml}
+                <div style="background:#F9FAFB; padding:15px; border-radius:4px; font-weight:bold; font-size:18px; text-align:right;">
+                    Total: ₹${order.total_amount}
+                </div>
+            `;
+            
+            document.getElementById('order-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('order-modal').style.display = 'none';
+            currentOrderId = null;
+        }
+
+        async function updateOrderStatus() {
+            if(!currentOrderId) return;
+            const newStatus = document.getElementById('modal-status').value;
+            
+            const { error } = await supabaseClient.from('orders').update({ order_status: newStatus }).eq('id', currentOrderId);
+            if(error) {
+                alert("Error updating status");
+                return;
+            }
+            
+            alert("Status updated!");
+            loadOrders(); // reload
+        }
+
+        // Filtering
+        document.getElementById('filter-status').addEventListener('change', (e) => {
+            const val = e.target.value;
+            if(val === 'All') renderOrders(allOrders);
+            else renderOrders(allOrders.filter(o => o.order_status === val));
+        });
+
+        document.getElementById('search-orders').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            renderOrders(allOrders.filter(o => 
+                o.order_number.toLowerCase().includes(val) || 
+                o.customer_name.toLowerCase().includes(val)
+            ));
+        });
+
+        document.addEventListener('DOMContentLoaded', loadOrders);
+    </script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.admin-sidebar').classList.toggle('open');
+            const overlay = document.getElementById('sidebarOverlay');
+            if(overlay) overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

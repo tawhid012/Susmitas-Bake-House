@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Management | Susmita's Bake House Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">Bake House Admin
+                <button class="mobile-close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-link"><i class="fas fa-home"></i> Dashboard</a>
+                <a href="orders.html" class="sidebar-link"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="products.html" class="sidebar-link"><i class="fas fa-cake-candles"></i> Products</a>
+                <a href="categories.html" class="sidebar-link"><i class="fas fa-tags"></i> Categories</a>
+                <a href="media.html" class="sidebar-link"><i class="fas fa-images"></i> Media Library</a>
+                <a href="customers.html" class="sidebar-link active"><i class="fas fa-users"></i> Customers</a>
+                <a href="homepage.html" class="sidebar-link"><i class="fas fa-globe"></i> Homepage CMS</a>
+                <a href="#" class="sidebar-link" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header class="admin-header">
+                <div class="admin-header-left">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+                    <h2>Customer Intelligence</h2>
+                </div>
+            </header>
+
+            <div class="admin-content">
+                <div style="margin-bottom: 20px;">
+                    <p style="color: var(--admin-gray);">View automatically aggregated customer profiles based on order history.</p>
+                </div>
+                
+                <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Phone Number</th>
+                            <th>Customer Name(s)</th>
+                            <th>Total Orders</th>
+                            <th>Lifetime Value (₹)</th>
+                            <th>Last Order Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customers-list">
+                        <tr><td colspan="5">Loading data from orders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        async function loadCustomers() {
+            // We build customer profiles dynamically by aggregating the orders table
+            const { data: orders, error } = await supabaseClient.from('orders').select('*').order('created_at', { ascending: false });
+            const tbody = document.getElementById('customers-list');
+            tbody.innerHTML = '';
+
+            if (error) {
+                console.error(error);
+                tbody.innerHTML = '<tr><td colspan="5">Error loading customer data.</td></tr>';
+                return;
+            }
+
+            if (orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">No customers found (no orders yet).</td></tr>';
+                return;
+            }
+
+            // Aggregation logic
+            const customersMap = {};
+
+            orders.forEach(order => {
+                const phone = order.phone.replace(/[^0-9+]/g, ''); // normalize phone
+                if (!customersMap[phone]) {
+                    customersMap[phone] = {
+                        phone: order.phone, // original formatting
+                        names: new Set([order.customer_name]),
+                        orderCount: 0,
+                        ltv: 0,
+                        lastOrderDate: new Date(order.created_at)
+                    };
+                }
+                
+                customersMap[phone].names.add(order.customer_name);
+                customersMap[phone].orderCount += 1;
+                customersMap[phone].ltv += order.total_amount;
+                
+                const orderDate = new Date(order.created_at);
+                if (orderDate > customersMap[phone].lastOrderDate) {
+                    customersMap[phone].lastOrderDate = orderDate;
+                }
+            });
+
+            // Convert to array and sort by LTV (highest first)
+            const customersArray = Object.values(customersMap).sort((a, b) => b.ltv - a.ltv);
+
+            customersArray.forEach(c => {
+                const namesList = Array.from(c.names).join(', ');
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${c.phone}</strong></td>
+                        <td>${namesList}</td>
+                        <td><span style="${c.orderCount > 1 ? 'background:#D1FAE5; color:#065F46; padding:3px 8px; border-radius:12px; font-weight:bold;' : ''}">${c.orderCount}</span></td>
+                        <td>₹${c.ltv}</td>
+                        <td>${c.lastOrderDate.toLocaleDateString()}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCustomers);
+    </script>
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.admin-sidebar').classList.toggle('open');
+            const overlay = document.getElementById('sidebarOverlay');
+            if(overlay) overlay.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
