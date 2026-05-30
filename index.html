@@ -289,12 +289,20 @@
                     document.getElementById('trending-cakes-container').innerHTML = 'API is undefined. Hard refresh required.';
                     return;
                 }
-            const sections = await API.getHomepageSections();
-            
-            // Render Hero
+            // Fetch everything in parallel
+            const [sections, homepageData] = await Promise.all([
+                API.getHomepageSections(),
+                API.getHomepageProducts()
+            ]);
+
+            // Render Hero Section
             if(sections.hero) {
-                document.getElementById('dyn-hero-headline').textContent = sections.hero.headline;
-                document.getElementById('dyn-hero-subheadline').textContent = sections.hero.subheadline;
+                const heroTitle = document.getElementById('hero-title');
+                if(heroTitle) {
+                    heroTitle.innerHTML = sections.hero.title;
+                    const heroSubtitle = document.getElementById('hero-subtitle');
+                    if(heroSubtitle) heroSubtitle.textContent = sections.hero.subtitle;
+                }
                 if(sections.hero.image_url) {
                     document.getElementById('dyn-hero-image').src = sections.hero.image_url;
                 }
@@ -322,7 +330,7 @@
                                 <div class="app-product-card">
                                     <div class="app-product-img">
                                         ${badge}
-                                        <img src="${imgUrl}" alt="${p.name}">
+                                        <img src="${imgUrl}" alt="${p.name}" loading="lazy">
                                         <a href="product-detail.html?slug=${p.slug}" class="btn-add-overlap">ADD</a>
                                     </div>
                                     <div class="app-product-info">
@@ -343,10 +351,6 @@
                     container.innerHTML = `<p>${emptyMessage}</p>`;
                 }
             }
-
-            // Fetch all sections in parallel to avoid slow waterfall loading
-            // Optimized: Fetch all products and categorize them locally in ONE call!
-            const homepageData = await API.getHomepageProducts();
 
             // Render all sliders
             renderSlider('trending-cakes-container', homepageData.featured, 'Check out our menu for delicious options!');
