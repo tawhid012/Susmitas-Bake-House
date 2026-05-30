@@ -345,18 +345,14 @@
             }
 
             // Fetch all sections in parallel to avoid slow waterfall loading
-            const [featuredProducts, giftsProducts, keychainProducts, bouquetProducts] = await Promise.all([
-                API.getFeaturedProducts(),
-                API.getProductsByCategorySlug('personalised-gifts'),
-                API.getProductsByCategorySlug('keychains'),
-                API.getProductsByCategorySlug('bouquets')
-            ]);
+            // Optimized: Fetch all products and categorize them locally in ONE call!
+            const homepageData = await API.getHomepageProducts();
 
             // Render all sliders
-            renderSlider('trending-cakes-container', featuredProducts, 'Check out our menu for delicious options!');
-            renderSlider('gifts-container', giftsProducts, 'Exciting gifts coming soon!');
-            renderSlider('keychains-container', keychainProducts, 'Unique keychains coming soon!');
-            renderSlider('bouquets-container', bouquetProducts, 'Beautiful bouquets coming soon!');
+            renderSlider('trending-cakes-container', homepageData.featured, 'Check out our menu for delicious options!');
+            renderSlider('gifts-container', homepageData.gifts, 'Exciting gifts coming soon!');
+            renderSlider('keychains-container', homepageData.keychains, 'Unique keychains coming soon!');
+            renderSlider('bouquets-container', homepageData.bouquets, 'Beautiful bouquets coming soon!');
             } catch(e) {
                 document.getElementById('trending-cakes-container').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`;
                 console.error(e);

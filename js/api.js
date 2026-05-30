@@ -81,6 +81,37 @@ const API = {
         }
     },
 
+    // Optimized Single-Call Fetch for Homepage to prevent slow loading
+    async getHomepageProducts() {
+        try {
+            const [prodResult, catResult] = await Promise.all([
+                supabaseClient.from('products').select('*').eq('active', true),
+                supabaseClient.from('categories').select('*')
+            ]);
+            
+            if (prodResult.error) throw prodResult.error;
+            let products = prodResult.data || [];
+            let categories = catResult.data || [];
+            
+            // Map categories to products for easy filtering
+            products.forEach(p => {
+                p.category = categories.find(c => c.id === p.category_id) || null;
+            });
+            
+            const excludedSlugs = ['personalised-gifts', 'keychains', 'bouquets'];
+            
+            return {
+                featured: products.filter(p => p.bestseller && (!p.category || !excludedSlugs.includes(p.category.slug))).slice(0, 5),
+                gifts: products.filter(p => p.category && p.category.slug === 'personalised-gifts'),
+                keychains: products.filter(p => p.category && p.category.slug === 'keychains'),
+                bouquets: products.filter(p => p.category && p.category.slug === 'bouquets')
+            };
+        } catch (err) {
+            console.error('Error fetching homepage products:', err);
+            return { featured: [], gifts: [], keychains: [], bouquets: [] };
+        }
+    },
+
     // Categories
     async getCategories() {
         try {
